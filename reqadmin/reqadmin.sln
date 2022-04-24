@@ -1,0 +1,21 @@
+Microsoft Visual Studio Solution File, Format Version 7.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "reqadmin", "reqadmin.csproj", "{B40BDBC2-AEB1-4CAC-A26E-89D6D592459A}"
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		ConfigName.0 = Debug
+		ConfigName.1 = Release
+	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{B40BDBC2-AEB1-4CAC-A26E-89D6D592459A}.Debug.ActiveCfg = Debug|.NET
+		{B40BDBC2-AEB1-4CAC-A26E-89D6D592459A}.Debug.Build.0 = Debug|.NET
+		{B40BDBC2-AEB1-4CAC-A26E-89D6D592459A}.Release.ActiveCfg = Release|.NET
+		{B40BDBC2-AEB1-4CAC-A26E-89D6D592459A}.Release.Build.0 = Release|.NET
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
