@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 namespace blob
 {
@@ -80,6 +81,48 @@ namespace blob
 			proc.StartInfo.Arguments = @" """+arg+@""" """+pid+@""" ";
 			proc.Start();
 		}
+
+	}
+
+	public class vb
+	{
+
+		private static string FindIndexedProcessName(int pid) 
+		{
+			string processName = Process.GetProcessById(pid).ProcessName;
+			Process[] processesByName = Process.GetProcessesByName(processName);
+			string processIndexdName = null;
+
+			for (int index = 0; index < processesByName.Length; index++) 
+			{
+				processIndexdName = index == 0 ? processName : processName + "#" + index;
+				PerformanceCounter processId = new PerformanceCounter("Process", "ID Process", processIndexdName);
+				if ((int) processId.NextValue() == pid) 
+				{
+					return processIndexdName;
+				}
+			}
+
+			return processIndexdName;
+		}
+
+		private static System.Diagnostics.Process FindPidFromIndexedProcessName(string indexedProcessName) 
+		{
+			System.Diagnostics.PerformanceCounter parentId = new System.Diagnostics.PerformanceCounter("Process", "Creating Process ID", indexedProcessName);
+			return Process.GetProcessById((int) parentId.NextValue());
+		}
+		/*
+				public static Process Parent(this Process process) 
+				{
+					return FindPidFromIndexedProcessName(FindIndexedProcessName(process.Id));
+				}
+				*/
+
+		public static int Parentxxx() 
+		{
+			return FindPidFromIndexedProcessName(FindIndexedProcessName(System.Diagnostics.Process.GetCurrentProcess().Id)).Id;
+		}
+	
 
 	}
 }

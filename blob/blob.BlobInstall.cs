@@ -20,6 +20,10 @@ namespace blob
 			BlobDirectory.CreateDirectoryIfNotExists(TargetDirectory);
 			string TargetFile = Path.Combine(TargetDirectory,Path.GetFileName(System.Reflection.Assembly.GetEntryAssembly().Location));
 			System.IO.File.Copy(Assembly.GetEntryAssembly().Location,TargetFile,true);
+			if (System.IO.File.Exists(Program.configfile))
+			{
+				System.IO.File.Delete(Program.configfile);
+			}
 			return TargetFile;
 		}
 
@@ -55,7 +59,7 @@ namespace blob
 			string command = @"""" + location + @"""" + @" """ + argument + @""" " + @"""" + "%1" + @"""";
 			string icon = @"" + location + @",0";
 			BlobRegistry.CreateKeyWithValue(hive, key + @"\command", null, command);
-			BlobRegistry.CreateKeyWithValue(hive, key + @"\command", "Icon", icon);
+			BlobRegistry.CreateKeyWithValue(hive, key , "Icon", icon);
 			BlobRegistry.CreateKeyWithValue(hive, key , null, description);
 		}
 

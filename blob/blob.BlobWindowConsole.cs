@@ -6,9 +6,24 @@ namespace blob
 {
 	public class BlobWindowConsole
 	{
+		const uint WM_CHAR = 0x0102;
+		const int VK_ENTER = 0x0D;
+
+		[DllImport("kernel32.dll")]
+		static extern IntPtr GetConsoleWindow();
+
+		[DllImport("user32.dll")]
+		static extern int SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
 
 		[DllImport("kernel32.dll")]
 		private static extern int AllocConsole();
+
+		[DllImport("kernel32.dll")]
+		private static extern uint AttachConsole(uint dwProcessId);
+
+		[DllImport("kernel32.dll", SetLastError=true, ExactSpelling=true)]
+		private static extern bool FreeConsole();
 
 		[DllImport("kernel32.dll")]
 		private static extern IntPtr CreateFile(
@@ -21,6 +36,7 @@ namespace blob
 			IntPtr hTemplateFile
 			);
 
+		private const uint ATTACH_PARRENT = 0xFFFFFFFF;
 		private const uint GENERIC_WRITE = 0x40000000;
 		private const uint FILE_SHARE_WRITE = 0x00000002;
 		private const uint OPEN_EXISTING = 0x00000003;
@@ -28,9 +44,30 @@ namespace blob
 
 		public static void Initialize()
 		{
-			if (AllocConsole() != 0)
+			//int parpid = blob.vb.Parentxxx();
+			uint att = AttachConsole(ATTACH_PARRENT);
+			if (att == 0)
 			{
-				InitializeOutStream();
+				int xx = AllocConsole();
+				if (xx != 0)
+				{
+					InitializeOutStream();
+				}
+			}
+			else
+			{
+				Console.WriteLine("Attach success");
+			}
+
+		}
+
+		public static void CloseConsole()
+		{
+			IntPtr cw = GetConsoleWindow();
+			if (cw != IntPtr.Zero)
+			{
+				SendMessage(cw, WM_CHAR, (IntPtr)VK_ENTER, IntPtr.Zero);
+				FreeConsole();
 			}
 		}
 

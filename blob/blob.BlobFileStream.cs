@@ -262,6 +262,14 @@ namespace blob
 		{
 			fileStream.Close();
 		}
+
+		public static void Copy(string source,string destination)
+		{
+			using(BlobFileStream writer = new BlobFileStream(destination, blob.BlobFileStream.Type.Writer))
+			{
+				writer.WriteFromReadStream(source);
+			}
+		}
 	}
 
 }

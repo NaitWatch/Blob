@@ -13,8 +13,7 @@ namespace blob
 		{
 			Exception e = (Exception)args.ExceptionObject;
 			string Message = MyHandler(e);
-			Console.WriteLine("BlobUnhandledException caught : "+Environment.NewLine + Message);
-			Console.ReadLine();
+			System.Windows.Forms.MessageBox.Show("BlobUnhandledException caught : "+Environment.NewLine + Message);
 		}
 
 		public static string MyHandler(Exception exception)

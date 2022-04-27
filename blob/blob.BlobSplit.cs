@@ -106,10 +106,6 @@ namespace blob
 				Console.WriteLine(" Done.");
 			} while (fileStream.Position != fileStream.Length);
 
-			
-			
-			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(BlobException.BlobUnhandledException);
-
 			fileStream.Close();
 
 			if (splitDeleteAfter)

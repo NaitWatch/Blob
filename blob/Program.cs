@@ -7,7 +7,7 @@ namespace blob
 	public class Program
 	{
 		public static BlobConfig blobConfig = new BlobConfig();
-		public static string configfile = null;
+		public static string configfile = "config.xml";
 
 		/// <summary>
 		/// The main entry point for the application.
@@ -15,9 +15,10 @@ namespace blob
 		[STAThread]
 		static void Main(string[] args)
 		{
+			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(BlobException.BlobUnhandledException);
 			string LocalApplicationDataDirectoryApplication = BlobDirectory.CreateLocalApplicationDataDirectory("blob");
 			//write default app config.
-			configfile = System.IO.Path.Combine(LocalApplicationDataDirectoryApplication,"config.xml");
+			configfile = System.IO.Path.Combine(LocalApplicationDataDirectoryApplication,"configfile");
 			if (System.IO.File.Exists(configfile))
 			{
 				blobConfig = (BlobConfig)blobConfig.ObjectFromDisk(configfile);
@@ -36,61 +37,83 @@ namespace blob
 				bool HasSwitches = blobCommand.CommandLineHasSwitches();
 				if (HasSwitches)
 				{
-					bool HasSpecificSwitches = blobCommand.CommandLineSwitchOneIsSet("h","i","shell_create_blob", "shell_extract","shell_config");
+					bool HasSpecificSwitches = blobCommand.CommandLineSwitchOneIsSet("s","d","t","h","i","shell_create_blob", "shell_extract","shell_config");
 					if (HasSpecificSwitches)
 					{
-						string[] switchParam = null;
-                     
+						string[] switchSource = blobCommand.Valid("s", 1);
+						string[] switchDestination = blobCommand.Valid("d", 1);
+						string[] switchType = blobCommand.Valid("t", 1);
 
-						switchParam = blobCommand.Valid("i", 0);
-						if (!(Equals(switchParam, null)))
+						if (BlobObject.IsSet(switchSource) && BlobObject.IsSet(switchDestination) && BlobObject.IsSet(switchType))
 						{
-							Console.WriteLine(@"Installing...");
-							blob.BlobInstall.Install();
+							//TODO: SET ENVIROMENT PATH TO FIND BLOB
+							//ALL PARAMETER MUST BE SETABLE
+							switchSource[0] = System.IO.Path.GetFullPath(switchSource[0]);
+
+							if (switchType[0] == "b")
+							{
+								BlobMerge.Create(switchSource[0], switchDestination[0], null);
+							}
+							else if (switchType[0] == "i")
+							{
+								byte[] sfxexe = BlobReflection.GetEmbeddedNetExeFromResource("blobstuba.exe","blobstub.app",true);
+								BlobMerge.Create(switchSource[0], switchDestination[0], sfxexe);
+							}
+							else if (switchType[0] == "a")
+							{
+								byte[] sfxexe = BlobReflection.GetEmbeddedNetExeFromResource("blobstuba.exe","blobstub.app",false);
+								BlobMerge.Create(switchSource[0], switchDestination[0], sfxexe);
+							}
 						}
 
-						switchParam = blobCommand.Valid("h", 0);
-						if (!(Equals(switchParam, null)))
+						string[] switchInstall = blobCommand.Valid("i", 0);
+						string[] switchHelp = blobCommand.Valid("h", 0);
+						string[] switchShellCreateBlob = blobCommand.Valid("shell_create_blob", 1);
+						string[] switchShellExtract = blobCommand.Valid("shell_extract", 1);
+						string[] switchShellConfig = blobCommand.Valid("shell_config", 1);
+
+						if (!(Equals(switchInstall, null)))
+						{
+							blob.BlobInstall.Install();
+							Console.WriteLine(@"Installing...");
+						}
+
+						if (!(Equals(switchHelp, null)))
 						{
 							DisplayHelp();
-							//Console.ReadLine();
 						}
 
-						switchParam = blobCommand.Valid("shell_create_blob", 1);
-						if (!(Equals(switchParam, null)))
+						if (!(Equals(switchShellCreateBlob, null)))
 						{
-							string absoluteDirectoryLocation = System.IO.Path.GetFullPath(switchParam[0]);
+							string absoluteDirectoryLocation = System.IO.Path.GetFullPath(switchShellCreateBlob[0]);
 							string absoluteDirLocation = System.IO.Path.GetDirectoryName(absoluteDirectoryLocation);
 							string lastpart = System.IO.Path.GetFileName(absoluteDirectoryLocation);
 							string targetfilename = System.IO.Path.Combine(absoluteDirLocation, lastpart) + ".blob";
 
 							if (blobConfig.mergeType == MergeType.AsBlobFile)
 							{
-								BlobMerge.Create(switchParam[0], targetfilename, null);
+								BlobMerge.Create(switchShellCreateBlob[0], targetfilename, null);
 							}
 							else if (blobConfig.mergeType == MergeType.AsInvokerExe)
 							{
 								byte[] sfxexe = BlobReflection.GetEmbeddedNetExeFromResource("blobstuba.exe","blobstub.app",true);
-								BlobMerge.Create(switchParam[0], targetfilename, sfxexe);
+								BlobMerge.Create(switchShellCreateBlob[0], targetfilename, sfxexe);
 							}
 							else if (blobConfig.mergeType == MergeType.AsAdminExe)
 							{
 								byte[] sfxexe = BlobReflection.GetEmbeddedNetExeFromResource("blobstuba.exe","blobstub.app",false);
-								BlobMerge.Create(switchParam[0], targetfilename, sfxexe);
+								BlobMerge.Create(switchShellCreateBlob[0], targetfilename, sfxexe);
 							}
-							
 						}
 
-						switchParam = blobCommand.Valid("shell_extract", 1);
-						if (!(Equals(switchParam, null)))
+						if (!(Equals(switchShellExtract, null)))
 						{
-							string filename = switchParam[0];
+							string filename = switchShellExtract[0];
 							string absoluteFileLocation = System.IO.Path.GetFullPath(filename);
 							BlobSplit.Split(absoluteFileLocation);
 						}
 
-						switchParam = blobCommand.Valid("shell_config", 1);
-						if (!(Equals(switchParam, null)))
+						if (!(Equals(switchShellConfig, null)))
 						{
 							System.Windows.Forms.Application.Run(new blob.blobconfigForm());
 						}
@@ -98,9 +121,6 @@ namespace blob
 					else
 					{
 						Console.WriteLine("Invalid or multiple exclusive switches detected.");
-						//Console.WriteLine(Environment.CommandLine);
-						//DisplayHelp();
-						//Console.ReadLine();
 					}
 				}
 				else
@@ -114,6 +134,7 @@ namespace blob
 				Console.WriteLine(@"Installing...");
 				blob.BlobInstall.Install();
 			}
+			blob.BlobWindowConsole.CloseConsole();
 		}
 
 		private static void DisplayHelp()
