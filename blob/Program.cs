@@ -15,6 +15,26 @@ namespace blob
 		[STAThread]
 		static void Main(string[] args)
 		{
+			Commander SwitchShellCreate = new Commander("/","shell_create_blob",1);
+			Commander SwitchShellExtract = new Commander("/","shell_extract",1);
+			Commander SwitchShellConfig = new Commander("/","shell_config",1);
+			Commander SwitchHelp = new Commander("/","h",0);
+			Commander SwitchInstall = new Commander("/","i",0);
+
+			Commander SwitchCreateSource = new Commander("/","s",1);
+			Commander SwitchCreateMetaDataDirectoryName = new Commander("/","m",1);
+			Commander SwitchCreateSplitVisibility = new Commander("/","vis",1);
+			Commander SwitchCreateSplitDestination = new Commander("/","dest",1);
+			Commander SwitchCreateSplitDestinationAppend = new Commander("/","destapp",1);
+			Commander SwitchCreateDeleteSource = new Commander("/","delsource",1);
+			
+			Commander SwitchCreateType = new Commander("/","type",1);
+			Commander SwitchCreateRequireAdmin = new Commander("/","reqadmin",1);
+			Commander SwitchCreateFile = new Commander("/","file",1);
+			Commander SwitchCreateArguments = new Commander("/","args",1);
+			Commander SwitchCreateDeleteAfter = new Commander("/","delrun",1);
+			
+
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(BlobException.BlobUnhandledException);
 			string LocalApplicationDataDirectoryApplication = BlobDirectory.CreateLocalApplicationDataDirectory("blob");
 			//write default app config.

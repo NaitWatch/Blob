@@ -237,4 +237,187 @@ namespace blob
 		}
 	}
 
+
+	public class Commander
+	{
+		private readonly string commandSymbol;
+
+		public string GetCommandSymbol
+		{
+			get { return commandSymbol; }
+		}
+
+		private readonly string commandChar;
+
+		public string GetCommandChar
+		{
+			get { return commandChar; }
+		}
+
+		private readonly string commandSwitch;
+
+		public string GetCommandSwitch
+		{
+			get { return commandSwitch; }
+		}
+
+		private readonly int minCommandParam;
+
+		public int GetMinCommandParam
+		{
+			get { return minCommandParam; }
+		}
+
+
+		private bool commandLineHasArgs;
+
+		public bool CommandLineHasArgs
+		{
+			get { return commandLineHasArgs; }
+		}
+
+		private bool isPresent;
+
+		public bool IsPresent
+		{
+			get { return isPresent; }
+		}
+
+		private int isPresentPosition;
+
+		public int IsPresentPosition
+		{
+			get { return isPresentPosition; }
+		}
+
+
+		private string[] parameters;
+
+		public string[] GetParameters
+		{
+			get { return parameters; }
+		}
+
+
+		private bool correctAmountOfParameters;
+
+		public bool IsValid
+		{
+			get { return correctAmountOfParameters; }
+		}
+
+		public string ParameterFirst
+		{
+			get 
+			{ 
+				if (parameters.Length > 0)
+				{
+					return parameters[0];
+				}
+				else
+				{
+					return null;
+				}
+                
+			}
+		}
+		public string ParameterSecond
+		{
+			get 
+			{ 
+				if (parameters.Length > 1)
+				{
+					return parameters[1];
+				}
+				else
+				{
+					return null;
+				}
+                
+			}
+		}
+
+		public string ParameterThird
+		{
+			get 
+			{ 
+				if (parameters.Length > 2)
+				{
+					return parameters[2];
+				}
+				else
+				{
+					return null;
+				}
+                
+			}
+		}
+
+		private string[] CommandLineArgs = null;
+
+		public Commander(string CommandSymbol,string CommandChar,int MinCommandParam)
+		{
+			commandSymbol = CommandSymbol;
+			commandChar = CommandChar;
+			minCommandParam = MinCommandParam;
+			CommandLineArgs = System.Environment.GetCommandLineArgs();
+			if (CommandLineArgs.Length > 1)
+			{
+				commandLineHasArgs = true;
+			}
+			commandSwitch = CommandSymbol + CommandChar;
+			parameters = new string[0];
+			if (commandLineHasArgs)
+			{
+				FindPresents();
+				CheckParam();
+			}
+		}
+
+		private void CheckParam()
+		{
+			//If switch exists
+			if (isPresent)
+			{
+				//if param could be inside commandline
+				if (isPresentPosition + minCommandParam < CommandLineArgs.Length)
+				{
+					correctAmountOfParameters = true;
+					for (int i = isPresentPosition+1; i < isPresentPosition + 1 + minCommandParam; i++)
+					{
+						//add to return vals;
+						if (CommandLineArgs[i].StartsWith(commandSymbol))
+						{
+							correctAmountOfParameters = false;
+							break;
+						}
+						if (correctAmountOfParameters)
+						{
+							string item = CommandLineArgs[i];
+							string[] result = new string[parameters.Length + 1];
+							parameters.CopyTo(result, 0);
+							result[parameters.Length] = item;
+							parameters = result;
+						}
+					}
+
+				}
+			}
+            
+		}
+
+		private void FindPresents()
+		{
+			for (int i = 0; i < CommandLineArgs.Length; i++)
+			{
+				if (CommandLineArgs[i] == commandSwitch)
+				{
+					isPresent = true;
+					isPresentPosition = i;
+				}
+			}
+		}
+
+
+	}
 }
