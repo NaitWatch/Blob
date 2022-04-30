@@ -13,6 +13,7 @@ Description coming soon, see picture for main usage... ;)
 - File format description
 - Branding of exe file details and icon
 - LMZA Compression, per file or complet
+- An old C++ based self unpacker to install even the .net framework 1.0 on NT4.0 ;)
 
 
 ![how_to_use](https://user-images.githubusercontent.com/97656046/166116411-6d620fac-cdbe-4b3c-9536-116b14da9c97.png)
