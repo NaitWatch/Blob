@@ -12,6 +12,7 @@ namespace blob
 			using (System.IO.StreamWriter streamWriter = System.IO.File.CreateText(filename))
 			{
 				streamWriter.Write(content);
+				streamWriter.Flush();
 				streamWriter.Close();
 			}
 		}

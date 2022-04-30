@@ -38,10 +38,20 @@ namespace blob
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(BlobException.BlobUnhandledException);
 			string LocalApplicationDataDirectoryApplication = BlobDirectory.CreateLocalApplicationDataDirectory("blob");
 			//write default app config.
-			configfile = System.IO.Path.Combine(LocalApplicationDataDirectoryApplication,"configfile");
+			configfile = System.IO.Path.Combine(LocalApplicationDataDirectoryApplication,configfile);
 			if (System.IO.File.Exists(configfile))
 			{
-				blobConfig = (BlobConfig)blobConfig.ObjectFromDisk(configfile);
+				try
+				{
+					blobConfig = (BlobConfig)blobConfig.ObjectFromDisk(configfile);
+				}
+				catch (Exception)
+				{
+					//XML Error cause of restructioning of xml
+					System.IO.File.Delete(configfile);
+					blobConfig.ObjectToDisk(configfile);
+					blobConfig = (BlobConfig)blobConfig.ObjectFromDisk(configfile);
+				}
 			}
 			else
 			{
@@ -94,7 +104,7 @@ namespace blob
 
 						if (!(Equals(switchInstall, null)))
 						{
-							blob.BlobInstall.Install();
+							blob.BlobInstall.Install(true);
 							Console.WriteLine(@"Installing...");
 						}
 
@@ -135,7 +145,7 @@ namespace blob
 
 						if (!(Equals(switchShellConfig, null)))
 						{
-							System.Windows.Forms.Application.Run(new blob.blobconfigForm());
+							System.Windows.Forms.Application.Run(new blob.blobConfigForm());
 						}
 					}
 					else
@@ -150,9 +160,7 @@ namespace blob
 			}
 			else
 			{
-				Console.WriteLine("No arguments detected.");
-				Console.WriteLine(@"Installing...");
-				blob.BlobInstall.Install();
+				blob.BlobInstall.Install(true);
 			}
 			blob.BlobWindowConsole.CloseConsole();
 		}

@@ -9,7 +9,7 @@ namespace blob
 	/// <summary>
 	/// Summary description for Form1.
 	/// </summary>
-	public class blobconfigForm : System.Windows.Forms.Form
+	public class blobConfigForm : System.Windows.Forms.Form
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -32,7 +32,7 @@ namespace blob
 		private System.Windows.Forms.CheckBox checkBox_ReqAdmin;
 		private System.Windows.Forms.Label label1;
 
-		public blobconfigForm()
+		public blobConfigForm()
 		{
 			//
 			// Required for Windows Form Designer support
@@ -94,7 +94,7 @@ namespace blob
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(blobconfigForm));
+			System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(blobConfigForm));
 			this.comboBox_CreateType = new System.Windows.Forms.ComboBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
@@ -284,7 +284,7 @@ namespace blob
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Run";
 			// 
-			// blobconfigForm
+			// blobConfigForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(248, 357);
@@ -300,7 +300,7 @@ namespace blob
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
-			this.Name = "blobconfigForm";
+			this.Name = "blobConfigForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Blob config";
 			this.Closing += new System.ComponentModel.CancelEventHandler(this.blobconfigForm_Closing);

@@ -2,17 +2,66 @@ using System;
 using System.IO;
 using System.Reflection;
 using Microsoft.Win32;
+using System.Runtime.InteropServices;
 
 namespace blob
 {
 	public class BlobInstall
 	{
-		public static void Install()
+		//TODO: Rework added ugly enviroment path and InstallToAppdir, check if started from cmd with path
+		[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+		public static extern IntPtr SendMessageTimeout(
+			IntPtr hWnd,
+			uint Msg,
+			UIntPtr wParam,
+			string lParam,
+			uint fuFlags,
+			uint uTimeout,
+			out UIntPtr lpdwResult);
+
+		//TODO: Rework added ugly enviroment path and InstallToAppdir, check if started from cmd with path
+		public static void Install(bool showform)
 		{
+			string LocalAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+			string TargetDirectory = Path.Combine(LocalAppData, "blob");
+			string TargetFile = Path.Combine(TargetDirectory,Path.GetFileName(System.Reflection.Assembly.GetEntryAssembly().Location));
+
+			if (TargetFile == System.Reflection.Assembly.GetEntryAssembly().Location)
+			{
+				return;
+			}
+
 			string application = InstallToAppDir("blob");
+
 			ShellRegistry(application);
+			if (showform)
+			{
+				System.Windows.Forms.Application.Run(new blob.blobInstallForm());
+			}
+
+			string applicationDir = System.IO.Path.GetDirectoryName(application);
+			string[] env = blob.BlobRegistry.ReadEnvironment();
+			bool appIsPath = false;
+			for (int i = 0;i < env.Length;i++)
+			{
+				if (applicationDir.ToLower(System.Globalization.CultureInfo.InvariantCulture) == env[i].ToLower(System.Globalization.CultureInfo.InvariantCulture))
+				{
+					appIsPath = true;
+					break;
+				}
+			}
+
+			if (!appIsPath)
+			{
+				blob.BlobRegistry.AppendEnvironment(applicationDir);
+
+				UIntPtr RESULT;
+				SendMessageTimeout(new IntPtr(0xffff), 0x001A, UIntPtr.Zero, "Environment", 0x2, 15000, out RESULT);
+			}
+
 		}
 
+		//TODO: Rework added ugly enviroment path and InstallToAppdir, check if started from cmd with path
 		private static string InstallToAppDir(string AppDir)
 		{
 			string LocalAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);

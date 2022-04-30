@@ -146,6 +146,16 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "blob.blobInstallForm.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "blob.blobInstallForm.resx"
+                    DependentUpon = "blob.blobInstallForm.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "blob.BlobMerge.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
