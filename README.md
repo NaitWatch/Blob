@@ -9,6 +9,7 @@ Description coming soon, see picture for main usage... ;)
 - Commandline (console) enhancement
 - Specify the target directory for the created file.
 - Uninstall
+- Blobing and Deblobing progress window option.
 - File format description
 - Branding of exe file details and icon
 - Compression
