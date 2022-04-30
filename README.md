@@ -12,7 +12,7 @@ Description coming soon, see picture for main usage... ;)
 - Blobing and Deblobing progress window option.
 - File format description
 - Branding of exe file details and icon
-- Compression
+- LMZA Compression, per file or complet
 
 
 ![how_to_use](https://user-images.githubusercontent.com/97656046/166116411-6d620fac-cdbe-4b3c-9536-116b14da9c97.png)
