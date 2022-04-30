@@ -1,4 +1,4 @@
-# Blob (Minimal .net framework packager of files in folders)
+# Blob (Minimal .net framework packager for files in folders)
 
 Description coming soon, see picture for main usage... ;)
 
