@@ -6,7 +6,7 @@ Description coming soon, see picture for main usage... ;)
 - Works even on Windows NT with .net Framework 1.0
 
 ## Features (in queue)
-- Commandline (console) enhancement
+- Commandline (console) enhancement (with Visual Studio postbuild focus)
 - Specify the target directory for the created file.
 - Uninstall
 - License change
