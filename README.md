@@ -2,6 +2,11 @@
 
 Description coming soon, see picture for main usage... ;)
 
+## Build requirments
+- Microsoft Windows XP
+- Microsoft Visual Studio 2002
+- Microsoft Windows SDK for Windows 7 and .NET Framework 4 (latest version that works on XP)
+
 ## Features implemented
 - Works even on Windows NT with .net Framework 1.0
 
