@@ -238,34 +238,36 @@ namespace blob
 	}
 
 
-	public class Commander
+	public class BlobCommandLine
 	{
-		private readonly string commandSymbol;
+		#region generic properties
 
-		public string GetCommandSymbol
+		private readonly string switchSymbol;
+
+		public string GetSwitchSymbol
 		{
-			get { return commandSymbol; }
+			get { return switchSymbol; }
 		}
 
-		private readonly string commandChar;
+		private readonly string switchCharacter;
 
-		public string GetCommandChar
+		public string GetSwitchCharacter
 		{
-			get { return commandChar; }
+			get { return switchCharacter; }
 		}
 
-		private readonly string commandSwitch;
+		private readonly string switchFull;
 
-		public string GetCommandSwitch
+		public string GetSwitchFull
 		{
-			get { return commandSwitch; }
+			get { return switchFull; }
 		}
 
-		private readonly int minCommandParam;
+		private readonly int switchMinimumRequiredParameter;
 
-		public int GetMinCommandParam
+		public int GetSwitchMinimumRequiredParameter
 		{
-			get { return minCommandParam; }
+			get { return switchMinimumRequiredParameter; }
 		}
 
 
@@ -276,43 +278,83 @@ namespace blob
 			get { return commandLineHasArgs; }
 		}
 
-		private bool isPresent;
-
-		public bool IsPresent
+		private bool switchIsExclusiveInCommandLine;
+		public bool SwitchIsExclusiveInCommandLine
 		{
-			get { return isPresent; }
+			get { return switchIsExclusiveInCommandLine; }
 		}
 
-		private int isPresentPosition;
+		private string[] switchIsExclusiveCommands;
 
-		public int IsPresentPosition
+		public string[] SwitchIsExclusiveCommands
 		{
-			get { return isPresentPosition; }
+			get { return switchIsExclusiveCommands; }
+		}
+
+		private bool subSwitchInParameter;
+
+		public bool SubSwitchInParameter
+		{
+			get { return subSwitchInParameter; }
+		}
+
+		public bool isOk
+		{
+			get { return !subSwitchInParameter; }
+		}
+
+		private bool switchExists;
+
+		public bool SwitchExists
+		{
+			get { return switchExists; }
+		}
+
+		private int switchExistsPosition;
+
+		public int SwitchExistsPosition
+		{
+			get { return switchExistsPosition; }
+		}
+
+		private bool switchHasMinimumRequiredParameter;
+
+		public bool SwitchHasMinimumRequiredParameter
+		{
+			get { return switchHasMinimumRequiredParameter; }
+		}
+
+		private int switchParameterFristPosition;
+
+		public int SwitchParameterFristPosition
+		{
+			get { return switchParameterFristPosition; }
+		}
+
+		private int switchParameterLastPosition;
+
+		public int SwitchParameterLastPosition
+		{
+			get { return switchParameterLastPosition; }
 		}
 
 
-		private string[] parameters;
+		private string[] switchParameters = new string[0];
 
-		public string[] GetParameters
+		public string[] GetSwitchParameters
 		{
-			get { return parameters; }
+			get { return switchParameters; }
 		}
 
-
-		private bool correctAmountOfParameters;
-
-		public bool IsValid
-		{
-			get { return correctAmountOfParameters; }
-		}
+		#endregion
 
 		public string ParameterFirst
 		{
 			get 
 			{ 
-				if (parameters.Length > 0)
+				if (switchParameters.Length > 0)
 				{
-					return parameters[0];
+					return switchParameters[0];
 				}
 				else
 				{
@@ -325,9 +367,9 @@ namespace blob
 		{
 			get 
 			{ 
-				if (parameters.Length > 1)
+				if (switchParameters.Length > 1)
 				{
-					return parameters[1];
+					return switchParameters[1];
 				}
 				else
 				{
@@ -341,9 +383,9 @@ namespace blob
 		{
 			get 
 			{ 
-				if (parameters.Length > 2)
+				if (switchParameters.Length > 2)
 				{
-					return parameters[2];
+					return switchParameters[2];
 				}
 				else
 				{
@@ -353,71 +395,134 @@ namespace blob
 			}
 		}
 
-		private string[] CommandLineArgs = null;
+		private string[] args = null;
 
-		public Commander(string CommandSymbol,string CommandChar,int MinCommandParam)
+		public BlobCommandLine(string SwitchSymbol,string SwitchCharacter,int MinimumRequiredParameter,string[] overrideCommandLineArgs)
 		{
-			commandSymbol = CommandSymbol;
-			commandChar = CommandChar;
-			minCommandParam = MinCommandParam;
-			CommandLineArgs = System.Environment.GetCommandLineArgs();
-			if (CommandLineArgs.Length > 1)
+			switchSymbol = SwitchSymbol;
+			switchCharacter = SwitchCharacter;
+			switchFull = SwitchSymbol + SwitchCharacter;
+
+			switchMinimumRequiredParameter = MinimumRequiredParameter;
+
+			args = System.Environment.GetCommandLineArgs();
+
+			if (!(Equals(overrideCommandLineArgs, null)))
+			{
+				args = overrideCommandLineArgs;
+			}
+
+			if (args.Length > 1)
 			{
 				commandLineHasArgs = true;
 			}
-			commandSwitch = CommandSymbol + CommandChar;
-			parameters = new string[0];
+
 			if (commandLineHasArgs)
 			{
 				FindPresents();
-				CheckParam();
+				SwitchParametersPositions();
+				PharseSwitchParameters();
+				SwitchParameterHasNoSymbol();
+				IsCommandLineExclusive();
 			}
 		}
 
-		private void CheckParam()
-		{
-			//If switch exists
-			if (isPresent)
-			{
-				//if param could be inside commandline
-				if (isPresentPosition + minCommandParam < CommandLineArgs.Length)
-				{
-					correctAmountOfParameters = true;
-					for (int i = isPresentPosition+1; i < isPresentPosition + 1 + minCommandParam; i++)
-					{
-						//add to return vals;
-						if (CommandLineArgs[i].StartsWith(commandSymbol))
-						{
-							correctAmountOfParameters = false;
-							break;
-						}
-						if (correctAmountOfParameters)
-						{
-							string item = CommandLineArgs[i];
-							string[] result = new string[parameters.Length + 1];
-							parameters.CopyTo(result, 0);
-							result[parameters.Length] = item;
-							parameters = result;
-						}
-					}
-
-				}
-			}
-            
-		}
-
+		
 		private void FindPresents()
 		{
-			for (int i = 0; i < CommandLineArgs.Length; i++)
+			for (int i = 0; i < args.Length; i++)
 			{
-				if (CommandLineArgs[i] == commandSwitch)
+				if (args[i] == switchFull)
 				{
-					isPresent = true;
-					isPresentPosition = i;
+					switchExists = true;
+					switchExistsPosition = i;
+					break;
 				}
 			}
 		}
 
+		private void SwitchParametersPositions()
+		{
+			//If switch exists
+			if (switchExists)
+			{
+				//if param could be inside commandline
+				if (switchExistsPosition + switchMinimumRequiredParameter < args.Length)
+				{
+					switchHasMinimumRequiredParameter = true;
+
+					switchParameterFristPosition = switchExistsPosition;
+					switchParameterLastPosition = switchExistsPosition + switchMinimumRequiredParameter;
+				}
+				else
+                {
+					switchHasMinimumRequiredParameter = false;
+				}
+			}
+		}
+
+		private void PharseSwitchParameters()
+        {
+			if (switchExists)
+			{
+				if (switchHasMinimumRequiredParameter)
+                {
+
+						string[] result = new string[switchParameterLastPosition - switchParameterFristPosition];
+						for (int i = switchParameterFristPosition; i < switchParameterLastPosition; i++)
+						{
+							result[i - switchParameterFristPosition] = args[i+1];
+							
+						}
+						switchParameters = result;
+					
+                }
+			}
+		}
+
+		private void SwitchParameterHasNoSymbol()
+		{
+			bool symbolIsInParameter = false;
+			for (int i = switchExistsPosition; i < switchParameterLastPosition; i++)
+			{
+				if (args[i+1].StartsWith(switchSymbol))
+                {
+					symbolIsInParameter = true;
+				}
+			}
+			subSwitchInParameter = symbolIsInParameter;
+		}
+
+		private void IsCommandLineExclusive()
+        {
+			string[] argscopy = new string[args.Length];
+			args.CopyTo(argscopy, 0);
+			argscopy[0] = null;
+			for (int i = switchExistsPosition; i <= switchParameterLastPosition; i++)
+			{
+				argscopy[i] = null;
+			}
+
+			bool exclusive = true;
+			string[] exclusiveCommands = new string[0];
+
+            for (int i = 0; i < argscopy.Length; i++)
+            {
+				if (!(Equals(argscopy[i], null)))
+				{
+					exclusive = false;
+
+					string[] temp = new string[exclusiveCommands.Length + 1];
+					exclusiveCommands.CopyTo(temp, 0);
+					temp[exclusiveCommands.Length] = argscopy[i];
+					exclusiveCommands = temp;
+				}
+			}
+
+			switchIsExclusiveInCommandLine = exclusive;
+			switchIsExclusiveCommands = exclusiveCommands;
+
+		}
 
 	}
 }

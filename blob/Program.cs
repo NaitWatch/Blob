@@ -15,51 +15,29 @@ namespace blob
 		[STAThread]
 		static void Main(string[] args)
 		{
-			Commander SwitchShellCreate = new Commander("/","shell_create_blob",1);
-			Commander SwitchShellExtract = new Commander("/","shell_extract",1);
-			Commander SwitchShellConfig = new Commander("/","shell_config",1);
-			Commander SwitchHelp = new Commander("/","h",0);
-			Commander SwitchInstall = new Commander("/","i",0);
+			BlobCommandLine SwitchHelp = new BlobCommandLine("/","h",0,null);
+			BlobCommandLine SwitchInstall = new BlobCommandLine("/","i",0,null);
 
-			Commander SwitchCreateSource = new Commander("/","s",1);
-			Commander SwitchCreateMetaDataDirectoryName = new Commander("/","m",1);
-			Commander SwitchCreateSplitVisibility = new Commander("/","vis",1);
-			Commander SwitchCreateSplitDestination = new Commander("/","dest",1);
-			Commander SwitchCreateSplitDestinationAppend = new Commander("/","destapp",1);
-			Commander SwitchCreateDeleteSource = new Commander("/","delsource",1);
+			BlobCommandLine SwitchCreateSource = new BlobCommandLine("/","s",1,null);
+			BlobCommandLine SwitchCreateMetaDataDirectoryName = new BlobCommandLine("/","m",1,null);
+			BlobCommandLine SwitchCreateSplitVisibility = new BlobCommandLine("/","vis",1,null);
+			BlobCommandLine SwitchCreateSplitDestination = new BlobCommandLine("/","dest",1,null);
+			BlobCommandLine SwitchCreateSplitDestinationAppend = new BlobCommandLine("/","destapp",1,null);
+			BlobCommandLine SwitchCreateDeleteSource = new BlobCommandLine("/","delsource",1,null);
 			
-			Commander SwitchCreateType = new Commander("/","type",1);
-			Commander SwitchCreateRequireAdmin = new Commander("/","reqadmin",1);
-			Commander SwitchCreateFile = new Commander("/","file",1);
-			Commander SwitchCreateArguments = new Commander("/","args",1);
-			Commander SwitchCreateDeleteAfter = new Commander("/","delrun",1);
+			BlobCommandLine SwitchCreateType = new BlobCommandLine("/","type",1,null);
+			BlobCommandLine SwitchCreateRequireAdmin = new BlobCommandLine("/","reqadmin",1,null);
+			BlobCommandLine SwitchCreateFile = new BlobCommandLine("/","file",1,null);
+			BlobCommandLine SwitchCreateArguments = new BlobCommandLine("/","args",1,null);
+			BlobCommandLine SwitchCreateDeleteAfter = new BlobCommandLine("/","delrun",1,null);
 			
 
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(BlobException.BlobUnhandledException);
-			string LocalApplicationDataDirectoryApplication = BlobDirectory.CreateLocalApplicationDataDirectory("blob");
-			//write default app config.
-			configfile = System.IO.Path.Combine(LocalApplicationDataDirectoryApplication,configfile);
-			if (System.IO.File.Exists(configfile))
-			{
-				try
-				{
-					blobConfig = (BlobConfig)blobConfig.ObjectFromDisk(configfile);
-				}
-				catch (Exception)
-				{
-					//XML Error cause of restructioning of xml
-					System.IO.File.Delete(configfile);
-					blobConfig.ObjectToDisk(configfile);
-					blobConfig = (BlobConfig)blobConfig.ObjectFromDisk(configfile);
-				}
-			}
-			else
-			{
-				blobConfig.ObjectToDisk(configfile);
-				blobConfig = (BlobConfig)blobConfig.ObjectFromDisk(configfile);
-			}
+			
+			MainLoadConfigFile();
 
 			BlobCommand blobCommand = new BlobCommand("/");
+			MainArgsShellCommands();
 
 			bool HasArguments = blobCommand.CommandLineHasArguments();
 			if (HasArguments)
@@ -112,41 +90,6 @@ namespace blob
 						{
 							DisplayHelp();
 						}
-
-						if (!(Equals(switchShellCreateBlob, null)))
-						{
-							string absoluteDirectoryLocation = System.IO.Path.GetFullPath(switchShellCreateBlob[0]);
-							string absoluteDirLocation = System.IO.Path.GetDirectoryName(absoluteDirectoryLocation);
-							string lastpart = System.IO.Path.GetFileName(absoluteDirectoryLocation);
-							string targetfilename = System.IO.Path.Combine(absoluteDirLocation, lastpart) + ".blob";
-
-							if (blobConfig.mergeType == MergeType.AsBlobFile)
-							{
-								BlobMerge.Create(switchShellCreateBlob[0], targetfilename, null);
-							}
-							else if (blobConfig.mergeType == MergeType.AsInvokerExe)
-							{
-								byte[] sfxexe = BlobReflection.GetEmbeddedNetExeFromResource("blobstuba.exe","blobstub.app",true);
-								BlobMerge.Create(switchShellCreateBlob[0], targetfilename, sfxexe);
-							}
-							else if (blobConfig.mergeType == MergeType.AsAdminExe)
-							{
-								byte[] sfxexe = BlobReflection.GetEmbeddedNetExeFromResource("blobstuba.exe","blobstub.app",false);
-								BlobMerge.Create(switchShellCreateBlob[0], targetfilename, sfxexe);
-							}
-						}
-
-						if (!(Equals(switchShellExtract, null)))
-						{
-							string filename = switchShellExtract[0];
-							string absoluteFileLocation = System.IO.Path.GetFullPath(filename);
-							BlobSplit.Split(absoluteFileLocation);
-						}
-
-						if (!(Equals(switchShellConfig, null)))
-						{
-							System.Windows.Forms.Application.Run(new blob.blobConfigForm());
-						}
 					}
 					else
 					{
@@ -163,6 +106,75 @@ namespace blob
 				blob.BlobInstall.Install(true);
 			}
 			blob.BlobWindowConsole.CloseConsole();
+		}
+
+
+		static void MainLoadConfigFile()
+		{
+			string LocalApplicationDataDirectoryApplication = BlobDirectory.CreateLocalApplicationDataDirectory("blob");
+			//write default app config.
+			configfile = System.IO.Path.Combine(LocalApplicationDataDirectoryApplication,configfile);
+			if (System.IO.File.Exists(configfile))
+			{
+				try
+				{
+					blobConfig = (BlobConfig)blobConfig.ObjectFromDisk(configfile);
+				}
+				catch (Exception)
+				{
+					//XML Error cause of restructioning of xml
+					System.IO.File.Delete(configfile);
+					blobConfig.ObjectToDisk(configfile);
+					blobConfig = (BlobConfig)blobConfig.ObjectFromDisk(configfile);
+				}
+			}
+			else
+			{
+				blobConfig.ObjectToDisk(configfile);
+				blobConfig = (BlobConfig)blobConfig.ObjectFromDisk(configfile);
+			}
+		}
+
+		static void MainArgsShellCommands()
+		{
+			BlobCommandLine SwitchShellCreate = new BlobCommandLine("/","shell_create_blob",1,null);
+			BlobCommandLine SwitchShellExtract = new BlobCommandLine("/","shell_extract",1,null);
+			BlobCommandLine SwitchShellConfig = new BlobCommandLine("/","shell_config",1,null);
+
+			if (SwitchShellCreate.isOk && SwitchShellCreate.SwitchIsExclusiveInCommandLine)
+			{
+				string absoluteDirectoryLocation = System.IO.Path.GetFullPath(SwitchShellCreate.ParameterFirst);
+				
+				string absoluteDirLocation = System.IO.Path.GetDirectoryName(absoluteDirectoryLocation);
+				string lastpart = System.IO.Path.GetFileName(absoluteDirectoryLocation);
+				
+				string targetfilename = System.IO.Path.Combine(absoluteDirLocation, lastpart) + ".blob";
+
+				if (blobConfig.mergeType == MergeType.AsBlobFile)
+				{
+					BlobMerge.Create(SwitchShellCreate.ParameterFirst, targetfilename, null);
+				}
+				else if (blobConfig.mergeType == MergeType.AsInvokerExe)
+				{
+					byte[] sfxexe = BlobReflection.GetEmbeddedNetExeFromResource("blobstuba.exe","blobstub.app",true);
+					BlobMerge.Create(SwitchShellCreate.ParameterFirst, targetfilename, sfxexe);
+				}
+				else if (blobConfig.mergeType == MergeType.AsAdminExe)
+				{
+					byte[] sfxexe = BlobReflection.GetEmbeddedNetExeFromResource("blobstuba.exe","blobstub.app",false);
+					BlobMerge.Create(SwitchShellCreate.ParameterFirst, targetfilename, sfxexe);
+				}
+			}
+
+			if (SwitchShellExtract.isOk && SwitchShellExtract.SwitchIsExclusiveInCommandLine)
+			{
+				string absoluteFileLocation = System.IO.Path.GetFullPath(SwitchShellExtract.ParameterFirst);
+				BlobSplit.Split(absoluteFileLocation);
+			}
+			if (SwitchShellConfig.isOk && SwitchShellConfig.SwitchIsExclusiveInCommandLine)
+			{
+				System.Windows.Forms.Application.Run(new blob.blobConfigForm());
+			}
 		}
 
 		private static void DisplayHelp()
