@@ -15,96 +15,30 @@ namespace blob
 		[STAThread]
 		static void Main(string[] args)
 		{
-			BlobCommandLine SwitchHelp = new BlobCommandLine("/","h",0,null);
-			BlobCommandLine SwitchInstall = new BlobCommandLine("/","i",0,null);
-
-			BlobCommandLine SwitchCreateSource = new BlobCommandLine("/","s",1,null);
-			BlobCommandLine SwitchCreateMetaDataDirectoryName = new BlobCommandLine("/","m",1,null);
-			BlobCommandLine SwitchCreateSplitVisibility = new BlobCommandLine("/","vis",1,null);
-			BlobCommandLine SwitchCreateSplitDestination = new BlobCommandLine("/","dest",1,null);
-			BlobCommandLine SwitchCreateSplitDestinationAppend = new BlobCommandLine("/","destapp",1,null);
-			BlobCommandLine SwitchCreateDeleteSource = new BlobCommandLine("/","delsource",1,null);
-			
-			BlobCommandLine SwitchCreateType = new BlobCommandLine("/","type",1,null);
-			BlobCommandLine SwitchCreateRequireAdmin = new BlobCommandLine("/","reqadmin",1,null);
-			BlobCommandLine SwitchCreateFile = new BlobCommandLine("/","file",1,null);
-			BlobCommandLine SwitchCreateArguments = new BlobCommandLine("/","args",1,null);
-			BlobCommandLine SwitchCreateDeleteAfter = new BlobCommandLine("/","delrun",1,null);
-			
-
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(BlobException.BlobUnhandledException);
 			
 			MainLoadConfigFile();
 
-			BlobCommand blobCommand = new BlobCommand("/");
-			MainArgsShellCommands();
-
-			bool HasArguments = blobCommand.CommandLineHasArguments();
-			if (HasArguments)
+			//If nothing was done all returned false
+			if (!(
+				MainArgsShellCommands() ||
+				MainArgsInstall() ||
+				MainArgsHelp() ||
+				MainArgsCreateInterfaceParam()
+				))
 			{
-				bool HasSwitches = blobCommand.CommandLineHasSwitches();
-				if (HasSwitches)
-				{
-					bool HasSpecificSwitches = blobCommand.CommandLineSwitchOneIsSet("s","d","t","h","i","shell_create_blob", "shell_extract","shell_config");
-					if (HasSpecificSwitches)
-					{
-						string[] switchSource = blobCommand.Valid("s", 1);
-						string[] switchDestination = blobCommand.Valid("d", 1);
-						string[] switchType = blobCommand.Valid("t", 1);
-
-						if (BlobObject.IsSet(switchSource) && BlobObject.IsSet(switchDestination) && BlobObject.IsSet(switchType))
-						{
-							//TODO: SET ENVIROMENT PATH TO FIND BLOB
-							//ALL PARAMETER MUST BE SETABLE
-							switchSource[0] = System.IO.Path.GetFullPath(switchSource[0]);
-
-							if (switchType[0] == "b")
-							{
-								BlobMerge.Create(switchSource[0], switchDestination[0], null);
-							}
-							else if (switchType[0] == "i")
-							{
-								byte[] sfxexe = BlobReflection.GetEmbeddedNetExeFromResource("blobstuba.exe","blobstub.app",true);
-								BlobMerge.Create(switchSource[0], switchDestination[0], sfxexe);
-							}
-							else if (switchType[0] == "a")
-							{
-								byte[] sfxexe = BlobReflection.GetEmbeddedNetExeFromResource("blobstuba.exe","blobstub.app",false);
-								BlobMerge.Create(switchSource[0], switchDestination[0], sfxexe);
-							}
-						}
-
-						string[] switchInstall = blobCommand.Valid("i", 0);
-						string[] switchHelp = blobCommand.Valid("h", 0);
-						string[] switchShellCreateBlob = blobCommand.Valid("shell_create_blob", 1);
-						string[] switchShellExtract = blobCommand.Valid("shell_extract", 1);
-						string[] switchShellConfig = blobCommand.Valid("shell_config", 1);
-
-						if (!(Equals(switchInstall, null)))
-						{
-							blob.BlobInstall.Install(true);
-							Console.WriteLine(@"Installing...");
-						}
-
-						if (!(Equals(switchHelp, null)))
-						{
-							DisplayHelp();
-						}
-					}
-					else
-					{
-						Console.WriteLine("Invalid or multiple exclusive switches detected.");
-					}
-				}
-				else
-				{
-					Console.WriteLine("No switches detected.");
-				}
+				DisplayHelp();
 			}
-			else
+
+			/*
+			TimeSpan xx = TimeSpan.FromSeconds(3);
+			DateTime dd = System.DateTime.Now + xx;
+			do
 			{
-				blob.BlobInstall.Install(true);
-			}
+				System.Threading.Thread.Sleep(50);
+			} while(dd > DateTime.Now);
+			*/
+			
 			blob.BlobWindowConsole.CloseConsole();
 		}
 
@@ -135,7 +69,8 @@ namespace blob
 			}
 		}
 
-		static void MainArgsShellCommands()
+
+		static bool MainArgsShellCommands()
 		{
 			BlobCommandLine SwitchShellCreate = new BlobCommandLine("/","shell_create_blob",1,null);
 			BlobCommandLine SwitchShellExtract = new BlobCommandLine("/","shell_extract",1,null);
@@ -150,39 +85,115 @@ namespace blob
 				
 				string targetfilename = System.IO.Path.Combine(absoluteDirLocation, lastpart) + ".blob";
 
-				if (blobConfig.mergeType == MergeType.AsBlobFile)
-				{
-					BlobMerge.Create(SwitchShellCreate.ParameterFirst, targetfilename, null);
-				}
-				else if (blobConfig.mergeType == MergeType.AsInvokerExe)
-				{
-					byte[] sfxexe = BlobReflection.GetEmbeddedNetExeFromResource("blobstuba.exe","blobstub.app",true);
-					BlobMerge.Create(SwitchShellCreate.ParameterFirst, targetfilename, sfxexe);
-				}
-				else if (blobConfig.mergeType == MergeType.AsAdminExe)
-				{
-					byte[] sfxexe = BlobReflection.GetEmbeddedNetExeFromResource("blobstuba.exe","blobstub.app",false);
-					BlobMerge.Create(SwitchShellCreate.ParameterFirst, targetfilename, sfxexe);
-				}
+				BlobMerge.CreateFromConfig(SwitchShellCreate.ParameterFirst, targetfilename);
+				return true;
 			}
 
 			if (SwitchShellExtract.isOk && SwitchShellExtract.SwitchIsExclusiveInCommandLine)
 			{
 				string absoluteFileLocation = System.IO.Path.GetFullPath(SwitchShellExtract.ParameterFirst);
 				BlobSplit.Split(absoluteFileLocation);
+				return true;
 			}
 			if (SwitchShellConfig.isOk && SwitchShellConfig.SwitchIsExclusiveInCommandLine)
 			{
 				System.Windows.Forms.Application.Run(new blob.blobConfigForm());
+				return true;
 			}
+
+			return false;
 		}
 
-		private static void DisplayHelp()
+		
+		static bool MainArgsInstall()
 		{
-			Console.WriteLine(@"Sample usage:");
-			Console.WriteLine(@"Create a self extracting blob file from a directory: blob.exe /s ""C:\user\Download"" ""C:\temp\Download.blob""");
-			Console.WriteLine(@"Create a blob file from a directory: blob.exe /c ""C:\user\Download"" ""C:\temp\Download.blob""");
-			Console.WriteLine(@"Extract files to a directory: blob.exe /d ""C:\temp\Download.blob"" ""C:\temp\foo""");
+			BlobCommandLine SwitchInstall = new BlobCommandLine("/","i",0,null);
+			if (SwitchInstall.isOk && SwitchInstall.SwitchIsExclusiveInCommandLine)
+			{
+				blob.BlobInstall.Install(true);
+				return true;
+			}
+
+			BlobCommandLine SwitchInstallSilent = new BlobCommandLine("/","s",0,null);
+			if (SwitchInstallSilent.isOk && SwitchInstallSilent.SwitchIsExclusiveInCommandLine)
+			{
+				blob.BlobInstall.Install(false);
+				return true;
+			}
+
+			return false;
+		}
+
+
+		static bool MainArgsHelp()
+		{
+			BlobCommandLine SwitchHelp = new BlobCommandLine("/","h",0,null);
+			//BlobCommandLine SwitchVersion = new BlobCommandLine("/","v",0,null);
+			if (SwitchHelp.isOk && SwitchHelp.SwitchIsExclusiveInCommandLine)
+			{
+				DisplayHelp();
+				return true;
+			}
+			/*
+			if (SwitchVersion.isOk && SwitchVersion.SwitchIsExclusiveInCommandLine)
+			{
+				System.Windows.Forms.MessageBox.Show("v"+blob.BlobReflection.GetEntryAssemblyVersion());
+				return true;
+			}
+			*/
+			return false;
+		}
+		
+
+		static bool MainArgsCreateInterfaceParam()
+		{
+			BlobCommandLine SwitchSource = new BlobCommandLine("/","s",1,null);
+			BlobCommandLine SwitchDestination = new BlobCommandLine("/","d",1,null);
+			BlobCommandLine SwitchFilename = new BlobCommandLine("/","f",1,null);
+			BlobCommandLine SwitchArguments = new BlobCommandLine("/","a",1,null);
+			if (SwitchSource.isOk && SwitchDestination.isOk && !SwitchFilename.isOk && !SwitchArguments.isOk)
+			{
+				BlobMerge.CreateFromConfig(SwitchSource.ParameterFirst, SwitchDestination.ParameterFirst);
+				return true;
+			}
+			if (SwitchSource.isOk && SwitchDestination.isOk && SwitchFilename.isOk && SwitchArguments.SwitchHasMinimumRequiredParameter)
+			{
+				BlobMerge.CreateUserTempInstaller(SwitchSource.ParameterFirst, SwitchDestination.ParameterFirst,SwitchFilename.ParameterFirst,SwitchArguments.ParameterFirst);
+				return true;
+			}
+
+			return false;
+		}
+
+		static void DisplayHelp()
+		{
+			blob.BlobWindowConsole.InitializeNew();
+			Console.WriteLine();
+			Console.WriteLine("Version: "+blob.BlobReflection.GetEntryAssemblyVersion());
+			Console.WriteLine();
+			
+			Console.WriteLine(@"Example of usage:");
+			Console.WriteLine();
+			Console.WriteLine(@"blob /s ""C:\temp"" /d ""C:\temp\temp.blob""");
+			Console.WriteLine(@"Creates a blob with config parameters");
+			Console.WriteLine();
+			Console.WriteLine(@"blob /s ""C:\base\github.com\NaitWatch\blob\blob\bin\Release"" /d ""C:\temp\blob_setup.blob"" /f ""blob.exe"" /a ""/i"" ");
+			Console.WriteLine(@"Creates a user installer (mini setup)");
+			Console.WriteLine();
+			
+			Console.WriteLine(@"Options (single):");
+			Console.WriteLine(@"/i ".PadRight(10,' ')+"Installs the blob.");
+			Console.WriteLine(@"/s ".PadRight(10,' ')+"Installs the blob silent.");
+			Console.WriteLine(@"/h ".PadRight(10,' ')+"Displays the help");
+
+			Console.WriteLine();
+			Console.WriteLine(@"Options:");
+			Console.WriteLine(@"/s".PadRight(10,' ')+"Source directory");
+			Console.WriteLine(@"/d".PadRight(10,' ')+"Destination file, needs always end with .blob");
+			Console.WriteLine(@"/f".PadRight(10,' ')+"Filename that will be exectuted after extract.");
+			Console.WriteLine(@"/a".PadRight(10,' ')+"Argument that will be exectuted after extract.");
+			
+
 		}
 	}
 }

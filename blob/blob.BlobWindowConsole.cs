@@ -4,28 +4,32 @@ using System.IO;
 
 namespace blob
 {
+
+	//
 	public class BlobWindowConsole
 	{
 		const uint WM_CHAR = 0x0102;
 		const int VK_ENTER = 0x0D;
 
-		[DllImport("kernel32.dll")]
+		[DllImport("kernel32.dll",SetLastError=true)]
 		static extern IntPtr GetConsoleWindow();
 
-		[DllImport("user32.dll")]
+		[DllImport("user32.dll",SetLastError=true)]
 		static extern int SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
+		[DllImport("kernel32.dll",SetLastError=true)]
+		[return: MarshalAs(UnmanagedType.U1)]
+		private static extern bool AllocConsole();
 
-		[DllImport("kernel32.dll")]
-		private static extern int AllocConsole();
-
-		[DllImport("kernel32.dll")]
-		private static extern uint AttachConsole(uint dwProcessId);
+		[DllImport("kernel32.dll",SetLastError=true)]
+		[return: MarshalAs(UnmanagedType.U1)]
+		private static extern bool AttachConsole(int dwProcessId);
 
 		[DllImport("kernel32.dll", SetLastError=true, ExactSpelling=true)]
 		private static extern bool FreeConsole();
 
-		[DllImport("kernel32.dll")]
+
+		[DllImport("kernel32.dll",SetLastError=true)]
 		private static extern IntPtr CreateFile(
 			string lpFileName,
 			uint dwDesiredAccess,
@@ -37,27 +41,33 @@ namespace blob
 			);
 
 		private const uint ATTACH_PARRENT = 0xFFFFFFFF;
+		private const int ATTACH_PARRENT_DWORD = -1;
 		private const uint GENERIC_WRITE = 0x40000000;
 		private const uint FILE_SHARE_WRITE = 0x00000002;
 		private const uint OPEN_EXISTING = 0x00000003;
 		private const uint FILE_ATTRIBUTE_NORMAL = 0x80;
 
-		public static void Initialize()
+		public static void InitializeNew()
 		{
-			//int parpid = blob.vb.Parentxxx();
-			uint att = AttachConsole(ATTACH_PARRENT);
-			if (att == 0)
+			IntPtr con = GetConsoleWindow();
+			bool ConsoleNotExists = (con == IntPtr.Zero);
+			if (ConsoleNotExists)
 			{
-				int xx = AllocConsole();
-				if (xx != 0)
+				bool AttachSuccess = AttachConsole(ATTACH_PARRENT_DWORD);
+				if (AttachSuccess)
 				{
 					InitializeOutStream();
 				}
+				else
+				{
+					bool AllocSuccess = AllocConsole();
+					if (AllocSuccess)
+					{
+						InitializeOutStream();
+					}
+				}
 			}
-			else
-			{
-				Console.WriteLine("Attach success");
-			}
+
 
 		}
 

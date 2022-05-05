@@ -14,7 +14,7 @@ namespace blob
 
 			if (pos == -1)
 			{
-				Console.WriteLine("MetaData not found");
+				//Console.WriteLine("MetaData not found");
 				return;
 			}
 
@@ -35,7 +35,7 @@ namespace blob
 
 			if (splitVisibility == SplitVisibility.Console)
 			{
-				BlobWindowConsole.Initialize();
+				BlobWindowConsole.InitializeNew();
 			}
 
 			Console.WriteLine("-------------- Embedded Params --------------");

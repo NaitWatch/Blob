@@ -30,6 +30,7 @@ namespace blob
 		private System.Windows.Forms.GroupBox groupBox2;
 		private System.Windows.Forms.CheckBox checkBox_deleteSource_afterex;
 		private System.Windows.Forms.CheckBox checkBox_ReqAdmin;
+		private System.Windows.Forms.LinkLabel linkLabel1;
 		private System.Windows.Forms.Label label1;
 
 		public blobConfigForm()
@@ -111,6 +112,7 @@ namespace blob
 			this.textBox_proc_Arguments = new System.Windows.Forms.TextBox();
 			this.checkBox_ReqAdmin = new System.Windows.Forms.CheckBox();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.linkLabel1 = new System.Windows.Forms.LinkLabel();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
@@ -284,11 +286,21 @@ namespace blob
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Run";
 			// 
+			// linkLabel1
+			// 
+			this.linkLabel1.Location = new System.Drawing.Point(8, 360);
+			this.linkLabel1.Name = "linkLabel1";
+			this.linkLabel1.Size = new System.Drawing.Size(48, 16);
+			this.linkLabel1.TabIndex = 18;
+			this.linkLabel1.TabStop = true;
+			this.linkLabel1.Text = "Uninstall";
+			// 
 			// blobConfigForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-			this.ClientSize = new System.Drawing.Size(248, 357);
+			this.ClientSize = new System.Drawing.Size(248, 381);
 			this.Controls.AddRange(new System.Windows.Forms.Control[] {
+																		  this.linkLabel1,
 																		  this.groupBox2,
 																		  this.groupBox1,
 																		  this.comboBox_DeBlobVis,
